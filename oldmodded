@@ -1,0 +1,36 @@
+//var index = require('C:/TurkeyBot/index.js')
+var spawnMCMod = require('child_process').spawn;
+var minecraftModdedServerProcess
+var Active = false;
+var Methods = {};
+
+var Methods = {
+runServer: function() {
+    Active = true;
+    var minecraftModdedServerProcess = spawnMCMod('java', [
+        '-Xmx6G',
+        '-Xms5G',
+        '-jar',
+        'C:/SERVERS/MinecraftModded/BassServer/modpack.jar',
+        'nogui'
+    ], {cwd: 'C:/SERVERS/MinecraftModded/BassServer', detached: true});
+    
+    function log(data) {
+        process.stdout.write(data.toString());
+    }
+    minecraftModdedServerProcess.stdout.on('data', log);
+    minecraftModdedServerProcess.stderr.on('data', log);
+
+    return Active;
+},
+stopServer: function(){
+    minecraftModdedServerProcess
+    //minecraftModdedServerProcess.stdin.write('stop\n')
+}
+};
+
+process.on('exit', function() {
+    minecraftModdedServerProcess.kill();
+});
+
+module.exports = Methods;

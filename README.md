@@ -10,6 +10,8 @@ Returns the current public IPv4 address.
 Starts a modded minecraft server running Direwolf20 1.12.2
 ### Turkey Minecraft Start:
 Starts a vanilla minecraft server.
+### Turkey Gmod Start:
+Starts a Garry's Mod server.
 ### Turkey Status:
 Returns which servers are on/off.
 ### Turkey Ram:

@@ -1,142 +1,109 @@
 const Discord = require('discord.js');
-const publicIp = require('public-ip');
-const Direwolf = require('./Direwolf');
-const Vanilla = require('./Minecraft');
-const GMod = require('./GarrysMod');
+const externalip = require('externalip');
+const cfg = require('./config.json');
+const servers = require('./servers.json');
+const ports = require('./ports.json');
+const server = require('./server.js')
 const fs = require('fs');
-const os = require('os');
+var os = require('os');
+
 const bot = new Discord.Client();
-const token = 'Your Token Here';
-var ipadd = 'Your External IPv4 Here';
+var ipadd = '69.69.69.69';
+var serverList;
+var portList;
+ 
 
-var GmodOn = false;
-var DirewolfOn = false;
-var VanillaOn = false;
 
-//gets public IP for server
-bot.on('message', function(message){
-    if(message.content == 'Turkey IP')
-    {
-        (async () => {
-            message.reply(await publicIp.v4());
-        })();
-    }
-});
+//On Startup
+bot.login(cfg.token);
 
-//Start Modded Direwolf20 Server
-bot.on('message', function(message){
-    if(message.content == 'Turkey Direwolf Start')
-    {
-
-        if(fs.existsSync('Direwolf.txt') == false){
-            Direwolf.runServer();
-            message.reply('Minecraft Direwolf Server Running at '+ipadd);    
-        } 
-        else if (fs.existsSync('Direwolf.txt')){
-            message.reply('Server already running at '+ipadd);
-        }
-    }
-});
-
-//Start Minecraft Vanilla
-bot.on('message', function(message){
-    if(message.content == 'Turkey Minecraft Start')
-    {
-
-        if(fs.existsSync('Vanilla.txt') == false){
-            Vanilla.runServer();
-            message.reply('Minecraft Server Running at '+ipadd + ':25566');    
-        } 
-        else if (fs.existsSync('Vanilla.txt')){
-            message.reply('Server already running at '+ipadd + ':25566');
-        }
-    }
-});
-    
-//Start Gmod Server
-bot.on('message', function(message){
-    if(message.content == 'Turkey Gmod Start')
-    {
-
-        if(fs.existsSync('GmodActive.txt') == false){
-            GMod.runServer();
-            message.reply('Gmod Server Running at '+ipadd);    
-        } 
-        else if (fs.existsSync('GmodActive.txt')){
-            message.reply('Server already running at '+ipadd);
-        }
-    }
-});
-
-//Gets status of servers
-bot.on('message', function(message){
-    if(message.content == 'Turkey Status'){
-        GmodOn = false;
-        DirewolfOn = false;
-        VanillaOn = false;
-
-        if(fs.existsSync('GmodActive.txt')){
-            GmodOn = true;  
-        }
-        
-        if(fs.existsSync('Direwolf.txt')){
-            DirewolfOn = true 
-        }
-        
-        if(fs.existsSync('Vanilla.txt')){
-            VanillaOn = true 
-        } 
-
-        if (GmodOn == true){
-            message.reply('Gmod server is up and running at ' + ipadd);
-        } else {
-            message.reply('Gmod server is off.');
-        }
-
-        if (DirewolfOn == true){
-            message.reply('Direwolf server is up and running at ' + ipadd);
-        } else {
-            message.reply('Direwolf server is off.');
-        }
-
-        if (VanillaOn == true){
-            message.reply('Minecraft server is up and running at ' + ipadd + ':25566');
-        } else {
-            message.reply('Minecraft server is off.');
-        }
-
-    }
-});
-
-//Gets the amount of ram the server is using
-bot.on('message', function(message){
-    if(message.content == 'Turkey Ram')
-    {
-        var totalmem = os.totalmem();
-        var freemem = os.freemem();
-        var usedmem = totalmem - freemem;
-        usedmem = usedmem/1024/1024/1024
-
-        message.reply('server is using ' + usedmem.toPrecision(3) +'GB/16GB');
-
-    }
-});
-
-//list of possible commands
-bot.on('message', function(message){
-    if(message.content == 'Turkey Help')
-    {
-        message.reply('\n Turkey Bot Commands: \n Turkey IP - Gets the IP address required to connect to servers. \n Turkey Direwolf Start - Starts a Direwolf server if one is not already running. \n Turkey Gmod Start - Starts a Gmod server. \n Turkey Minecraft Start - Starts a vanilla minecraft server. \n Turkey Status - Shows which servers are active and which are off. \n Turkey Ram - Shows the amount of ram the servers are using.');
-
-    }
-});
-
-//says when bot is ready
 bot.on('ready', function(){
-    (async () => {
-        ipadd = await publicIp.v4();
-    })();
-    console.log("Ready");
+    console.log("Servers Active:");
+    serverList = [cfg.numberOfServers];
+    portList = [cfg.numberOfServers];
+    var i;
+    for (i = 0; i < cfg.numberOfServers; i++) {
+        serverList[i] = servers["server"+(i+1)];
+        portList[i] = ports["server"+(i+1)];
+        console.log(serverList[i]);
+    }
+
+    externalip(function (err, ip) {
+        ipadd = (ip); // => 8.8.8.8
+      });
+        console.log("===================")
+        console.log("Ready");
 });
 
-bot.login(token);
+
+
+//On Message
+bot.on('message', function(message){
+    var msg = message.content.toString();
+    msg = msg.toLowerCase();
+
+    var x;
+    //Turkey Commands
+    if(msg.startsWith("turkey")){
+        
+        //Starting servers
+        var j = 0;
+        for (x of serverList){
+            if(msg == 'turkey ' + x.toLowerCase() + ' start'){
+                if (fs.existsSync(x+'.txt') == false){
+                server.runServer(x, cfg.serverPath);
+                message.reply(x+ ' server started at '+ ipadd +':'+portList[j]);
+                }else{
+                    message.reply(x+ ' server already running at '+ ipadd +':'+portList[j]);
+                }
+                return;
+            }
+            j++;
+        }
+
+        //Help Command
+        if (msg == 'turkey help'){
+            for (x of serverList){
+
+                message.reply('Turkey '+x+ ' Start- To start a ' + x+ ' server')
+                console.log(msg);
+            }
+        }
+        //status
+        var j = 0;
+        if (msg == 'turkey status'){
+            for (x of serverList){
+
+                if (fs.existsSync(x+'.txt') == false){
+                    message.reply(x+' server is off');
+                } else{
+                    message.reply(x+' server is up and running at '+ ipadd +':'+portList[j]);
+                }
+                j++
+            }
+            console.log(msg);
+        }
+
+        //Ram Usage
+        if(msg == 'turkey usage'){
+
+            var mem = ((os.totalmem - os.freemem)/1024/1024/1024).toPrecision(3);
+
+
+            message.reply('Ram ' + mem + 'GB/'+ (os.totalmem/1024/1024/1024).toPrecision(3)+'GB');
+            console.log(msg);
+        }
+
+        //Get new IP
+        if (msg == 'turkey ip'){
+
+            externalip(function (err, ip) {
+                ipadd = (ip); // => 8.8.8.8
+              });
+
+            message.reply(ipadd);
+            console.log(msg);
+        }
+    }
+
+});

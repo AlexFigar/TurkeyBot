@@ -1,0 +1,28 @@
+{
+  "name": "turkeybot",
+  "version": "1.0.0",
+  "description": "server manager bot",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^11.6.4",
+    "external-ip": "^2.1.1",
+    "public-ip": "^4.0.0",
+    "rcon": "^1.0.3",
+    "usage": "^0.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexFigar/TurkeyBot.git"
+  },
+  "author": "Alex Figar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexFigar/TurkeyBot/issues"
+  },
+  "homepage": "https://github.com/AlexFigar/TurkeyBot#readme"
+}

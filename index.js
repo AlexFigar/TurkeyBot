@@ -75,8 +75,8 @@ bot.on('message', function (message) {
             for (x of serverList) {
 
                 message.reply('Turkey ' + x + ' Start- To start a ' + x + ' server')
-                console.log(msg);
             }
+            console.log(msg);
         }
         //status
         var j = 0;
